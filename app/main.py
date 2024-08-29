@@ -52,6 +52,7 @@ class Battleship:
     def fire(self, location: tuple[int, int]) -> str:
         if location in self.field:
             sunk = self.field[location].fire(*location)
+            self.print_field()
             return "Sunk!" if sunk else "Hit!"
 
         return "Miss!"
