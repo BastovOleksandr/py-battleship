@@ -48,7 +48,6 @@ class Battleship:
             for deck in current_ship.decks:
                 self.field[(deck.row, deck.column)] = current_ship
         self._validate_field()
-        self.print_field()
 
     def fire(self, location: tuple[int, int]) -> str:
         if location in self.field:
