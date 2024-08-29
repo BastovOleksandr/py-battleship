@@ -15,7 +15,7 @@ class Ship:
         self.is_drowned = is_drowned
         self.decks = []
         if start == end:
-            self.decks.append(Deck(start[0], start[1]))
+            self.decks.append(Deck(*start))
         elif start[0] == end[0] and start[1] != end[1]:
             for num in range(end[1] - start[1] + 1):
                 self.decks.append(Deck(start[0], start[1] + num))
@@ -30,7 +30,7 @@ class Ship:
 
     def fire(self, row: int, column: int) -> bool:
         deck = self.get_deck(row, column)
-        if not self.is_drowned and deck.is_alive:
+        if deck.is_alive and not self.is_drowned:
             deck.is_alive = False
             for deck in self.decks:
                 if deck.is_alive:
@@ -44,11 +44,13 @@ class Battleship:
     def __init__(self, ships: list[tuple[tuple, tuple]]) -> None:
         self.field = {}
         for ship in ships:
-            current_ship = Ship(ship[0], ship[1])
+            current_ship = Ship(*ship)
             for deck in current_ship.decks:
                 self.field[(deck.row, deck.column)] = current_ship
+        self._validate_field()
+        self.print_field()
 
-    def fire(self, location: tuple) -> str:
+    def fire(self, location: tuple[int, int]) -> str:
         if location in self.field:
             sunk = self.field[location].fire(*location)
             return "Sunk!" if sunk else "Hit!"
@@ -57,11 +59,11 @@ class Battleship:
 
     def _validate_field(self) -> None:
         ships = set(self.field.values())
-        if not (
-            len(ships) == 10
-            or self._validate_ships_count
-            or self._validate_ship_location
-        ):
+        if not all([
+            len(ships) == 10,
+            self._validate_ships_count,
+            self._validate_ship_location
+        ]):
             raise InvalidBattleshipField(
                 "Incorrect ship coordinates in the passed list"
             )
@@ -77,7 +79,7 @@ class Battleship:
                     empty[deck.row][deck.column] = u"\u25A1"
                 else:
                     empty[deck.row][deck.column] = marker
-        filled_field = ""
+        filled_field = "\n"
 
         for row in empty:
             filled_field += "\t".join(row) + "\n"
@@ -102,7 +104,7 @@ class Battleship:
                 if adjacent in self.field and self.field[adjacent] != ship:
                     return False
 
-        return False
+        return True
 
 
 class InvalidBattleshipField(Exception):
